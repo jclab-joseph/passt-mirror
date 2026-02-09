@@ -1,23 +1,30 @@
 # passt Go migration (WIP)
 
-이 디렉터리 변경은 `passt` C 구현을 Go로 단계적으로 마이그레이션하기 위한 초기 골격입니다.
+이 변경은 `passt`를 Go로 단계적으로 마이그레이션하기 위한 실행 가능한 기반입니다.
 
 ## 목표
-- 기존 C 모듈 구조(`*.c`)를 최대한 유지하기 위해 `internal/passt/<module>.go` 1:1 파일 매핑을 구성
-- TCP/IP 스택은 gVisor netstack (`gvisor.dev/gvisor/pkg/tcpip/...`) 사용
-- Windows / Linux / macOS 크로스 컴파일 가능한 순수 Go 중심 구조 제공
+- 기존 C 모듈 구조(`*.c`)를 최대한 유지하기 위해 `internal/passt/<module>.go` 1:1 파일 매핑 유지
+- TCP/IP 스택은 gVisor netstack 사용 경로 제공 (`-tags gvisor`)
+- Windows / Linux / macOS 크로스 컴파일 가능한 구조 제공
 
-## 현재 상태
+## 현재 구현 상태
 - 엔트리 포인트: `cmd/passt-go/main.go`
-- 설정/로깅/엔진 루프/기본 netstack 초기화 구현
-- 나머지 모듈은 C 코드 대응 파일로 스텁 생성 후 TODO 주석으로 포팅 지점 명시
+- 설정/로깅/엔진 루프 구현
+- TCP/UDP 프록시 서비스 구현 (`tcp.go`, `udp.go`) 및 엔진 연동
+- 모듈 매핑 스텁 유지: 아직 포팅되지 않은 C 모듈은 TODO로 추적
 
-## 빌드
+## 테스트 이식
+기존 테스트 시나리오 중 가장 핵심적인 연결성 검증을 Go 단위 테스트로 이식했습니다.
+- TCP 전달 검증: `TestTCPProxyForwards`
+- UDP 응답 검증: `TestUDPProxyResponds`
+
+## 빌드 / 검증
 ```bash
-go build ./cmd/passt-go
+go test ./...
+GOOS=windows GOARCH=amd64 go build ./cmd/passt-go
+GOOS=darwin GOARCH=amd64 go build ./cmd/passt-go
+GOOS=linux GOARCH=amd64 go build ./cmd/passt-go
 ```
 
-## 다음 단계
-1. `tap.c`, `packet.c`, `flow.c` 순으로 데이터패스 포팅
-2. `tcp.c`, `udp.c`, `icmp.c` 포팅 후 통합 테스트 이식
-3. `vhost_user.c`, `virtio.c` 포팅으로 qemu 통합 완성
+## 알려진 이슈
+- `go test -tags gvisor ./...`는 upstream gVisor 모듈의 코드 생성/패키징 이슈로 현재 실패합니다.
