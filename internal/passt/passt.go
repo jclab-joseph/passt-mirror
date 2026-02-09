@@ -1,4 +1,3 @@
 package passt
 
-// passt.go intentionally mirrors passt.c from the original C codebase.
-// TODO: Port logic from passt.c with API-compatible behavior.
+// passt.go reserves the module mapping for passt.c from the original C codebase.

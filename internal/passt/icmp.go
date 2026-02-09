@@ -1,4 +1,3 @@
 package passt
 
-// icmp.go intentionally mirrors icmp.c from the original C codebase.
-// TODO: Port logic from icmp.c with API-compatible behavior.
+// icmp.go reserves the module mapping for icmp.c from the original C codebase.

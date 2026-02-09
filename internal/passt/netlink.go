@@ -1,4 +1,3 @@
 package passt
 
-// netlink.go intentionally mirrors netlink.c from the original C codebase.
-// TODO: Port logic from netlink.c with API-compatible behavior.
+// netlink.go reserves the module mapping for netlink.c from the original C codebase.

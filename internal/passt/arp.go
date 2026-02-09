@@ -1,4 +1,3 @@
 package passt
 
-// arp.go intentionally mirrors arp.c from the original C codebase.
-// TODO: Port logic from arp.c with API-compatible behavior.
+// arp.go reserves the module mapping for arp.c from the original C codebase.

@@ -15,6 +15,9 @@ type Engine struct {
 func NewEngine(cfg Config) *Engine {
 	logger := NewLogger()
 	ns := NewNetstack(cfg)
+	if err := ns.Validate(); err != nil {
+		logger.Errorf("netstack config invalid: %v", err)
+	}
 	services := []Service{
 		NewTCPProxy(cfg.TCPListen, cfg.TCPTarget, logger),
 		NewUDPProxy(cfg.UDPListen, cfg.UDPTarget, logger),

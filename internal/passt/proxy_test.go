@@ -51,13 +51,21 @@ func TestTCPProxyForwards(t *testing.T) {
 	}
 }
 
-func TestUDPProxyResponds(t *testing.T) {
+func TestUDPProxyForwardsEcho(t *testing.T) {
 	targetAddr, _ := net.ResolveUDPAddr("udp", "127.0.0.1:0")
 	targetConn, err := net.ListenUDP("udp", targetAddr)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer targetConn.Close()
+	go func() {
+		buf := make([]byte, 256)
+		n, from, err := targetConn.ReadFromUDP(buf)
+		if err != nil {
+			return
+		}
+		_, _ = targetConn.WriteToUDP(buf[:n], from)
+	}()
 
 	proxy := NewUDPProxy("127.0.0.1:0", targetConn.LocalAddr().String(), NewLogger())
 	ctx, cancel := context.WithCancel(context.Background())
@@ -79,7 +87,31 @@ func TestUDPProxyResponds(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if string(buf[:n]) != "ok" {
+	if string(buf[:n]) != "hello" {
 		t.Fatalf("got %q", string(buf[:n]))
+	}
+}
+
+func TestEngineShutdown(t *testing.T) {
+	cfg := Config{
+		Mode:            "passt",
+		ListenAddr:      "127.0.0.1",
+		MTU:             1500,
+		ShutdownTimeout: 2 * time.Second,
+		TCPListen:       "127.0.0.1:0",
+		TCPTarget:       "127.0.0.1:1",
+		UDPListen:       "127.0.0.1:0",
+		UDPTarget:       "127.0.0.1:1",
+	}
+	eng := NewEngine(cfg)
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan error, 1)
+	go func() { done <- eng.Run(ctx) }()
+	time.Sleep(100 * time.Millisecond)
+	cancel()
+	select {
+	case <-time.After(3 * time.Second):
+		t.Fatal("engine did not stop")
+	case <-done:
 	}
 }

@@ -1,4 +1,3 @@
 package passt
 
-// tap.go intentionally mirrors tap.c from the original C codebase.
-// TODO: Port logic from tap.c with API-compatible behavior.
+// tap.go reserves the module mapping for tap.c from the original C codebase.

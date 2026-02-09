@@ -1,4 +1,3 @@
 package passt
 
-// dhcp.go intentionally mirrors dhcp.c from the original C codebase.
-// TODO: Port logic from dhcp.c with API-compatible behavior.
+// dhcp.go reserves the module mapping for dhcp.c from the original C codebase.

@@ -1,4 +1,3 @@
 package passt
 
-// vu_common.go intentionally mirrors vu_common.c from the original C codebase.
-// TODO: Port logic from vu_common.c with API-compatible behavior.
+// vu_common.go reserves the module mapping for vu_common.c from the original C codebase.
