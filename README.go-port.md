@@ -4,21 +4,28 @@
 
 ## 목표
 - 기존 C 모듈 구조(`*.c`)를 최대한 유지하기 위해 `internal/passt/<module>.go` 1:1 파일 매핑 유지
-- TCP/IP 관련 주소/프로토콜 모델은 gVisor `tcpip` 타입 사용
+- TAP 성격의 L2 프레임 전달 파이프라인 구성
+- TCP/IP 헬퍼는 gVisor 라이브러리 사용
 - Windows / Linux / macOS 크로스 컴파일 가능한 구조 제공
 
 ## 현재 구현 상태
 - 엔트리 포인트: `cmd/passt-go/main.go`
 - 설정/로깅/엔진 루프 구현
-- TCP/UDP 프록시 서비스 구현 (`tcp.go`, `udp.go`) 및 엔진 연동
-- 엔진 종료 시 서비스 reverse-order 종료
-- 원본 C 모듈별 대응 파일 유지
+- L2 핵심 경로:
+  - Ethernet 파서/직렬화 (`packet.go`)
+  - TAP 추상화 및 메모리 TAP pair (`tap.go`)
+  - MAC 학습 테이블 (`flow.go`)
+  - L2 포워더 (`fwd.go`)
+  - PCAP 기록기 (`pcap.go`)
+- L4 경로: TCP/UDP 프록시 서비스 (`tcp.go`, `udp.go`)
 
-## 테스트 이식
-기존 연결성 검증 성격의 테스트를 Go 단위 테스트로 이식했습니다.
+## 테스트 이식/추가
 - TCP 전달 검증: `TestTCPProxyForwards`
 - UDP echo 전달 검증: `TestUDPProxyForwardsEcho`
 - 엔진 종료 검증: `TestEngineShutdown`
+- Ethernet 프레임 round-trip 검증
+- L2 포워더 프레임 전달 검증
+- PCAP 파일 기록 검증
 
 ## 빌드 / 검증
 ```bash

@@ -18,10 +18,25 @@ func NewEngine(cfg Config) *Engine {
 	if err := ns.Validate(); err != nil {
 		logger.Errorf("netstack config invalid: %v", err)
 	}
-	services := []Service{
+
+	services := make([]Service, 0, 3)
+	if cfg.EnableL2 {
+		guestTap, hostTap := NewMemoryTapPair("guest-tap", "host-tap", 128)
+		var pcap *PCAPWriter
+		if cfg.EnablePCAP {
+			writer, err := NewPCAPWriter(cfg.PCAPPath)
+			if err != nil {
+				logger.Errorf("failed to create pcap: %v", err)
+			} else {
+				pcap = writer
+			}
+		}
+		services = append(services, NewL2Forwarder(guestTap, hostTap, NewMACTable(0), pcap, logger))
+	}
+	services = append(services,
 		NewTCPProxy(cfg.TCPListen, cfg.TCPTarget, logger),
 		NewUDPProxy(cfg.UDPListen, cfg.UDPTarget, logger),
-	}
+	)
 	return &Engine{runtime: Runtime{Config: cfg, Logger: logger, Netstack: ns}, services: services}
 }
 

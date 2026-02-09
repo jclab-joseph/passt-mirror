@@ -12,6 +12,7 @@ type Config struct {
 	MTU             int
 	EnablePCAP      bool
 	PCAPPath        string
+	EnableL2        bool
 	ShutdownTimeout time.Duration
 	TCPListen       string
 	TCPTarget       string
@@ -26,6 +27,7 @@ func ParseConfig() Config {
 	flag.IntVar(&cfg.MTU, "mtu", 1500, "L2 MTU")
 	flag.BoolVar(&cfg.EnablePCAP, "pcap", false, "enable packet capture output")
 	flag.StringVar(&cfg.PCAPPath, "pcap-path", "passt.pcap", "pcap output path")
+	flag.BoolVar(&cfg.EnableL2, "l2", true, "enable L2 TAP-style forwarding pipeline")
 	flag.DurationVar(&cfg.ShutdownTimeout, "shutdown-timeout", 5*time.Second, "graceful shutdown timeout")
 	flag.StringVar(&cfg.TCPListen, "tcp-listen", "127.0.0.1:10080", "TCP proxy listen address")
 	flag.StringVar(&cfg.TCPTarget, "tcp-target", "127.0.0.1:80", "TCP proxy target address")
